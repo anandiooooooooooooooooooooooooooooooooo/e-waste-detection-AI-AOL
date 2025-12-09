@@ -34,6 +34,8 @@ ENV/
 ENV*/
 pip-log.txt
 pip-delete-this-directory.txt
+.env
+*.env
 
 # Ignore model checkpoints or weights but keep README placeholders
 *.pt
@@ -116,3 +118,18 @@ frontend/.env.production.local
 # If you only use npm, ignore others
 # yarn.lock
 # pnpm-lock.yaml
+
+# =========================
+# 🚫 Big Folders/Files
+# =========================
+# Ignore large folders and files to reduce repo size
+backend/static/results/
+backend/static/uploads/
+dev/e_waste_dataset/train/
+dev/e_waste_dataset/valid/
+dev/e_waste_dataset/test/
+dev/models/trained_model/
+dev/runs/detect/
+dev/e_waste_dataset.zip
+!dev/models/trained_model/README.md
+!runs/detect/README.md

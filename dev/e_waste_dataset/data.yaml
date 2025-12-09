@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 38
+names: ['Battery', 'CRT-Monitor', 'CRT-TV', 'Ceiling-Fan', 'Clothes-Iron', 'Coffee-Machine', 'Computer-Keyboard', 'Computer-Mouse', 'Desktop-PC', 'Dishwasher', 'Flashlight', 'Flat-Panel-Monitor', 'Flat-Panel-TV', 'Floor-Fan', 'Freezer', 'HDD', 'LED-Bulb', 'Laptop', 'Microwave', 'Music-Player', 'Network-Switch', 'Oven', 'PCB', 'Power-Adapter', 'Printer', 'Projector', 'Refrigerator', 'Router', 'SSD', 'Smartphone', 'Smoke-Detector', 'Speaker', 'Stove', 'Table-Lamp', 'Toaster', 'USB-Flash-Drive', 'Vacuum-Cleaner', 'Washing-Machine']
+
+roboflow:
+  workspace: yoreg-9hqze
+  project: e-waste-dataset-r0ojc-4yoeh
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/yoreg-9hqze/e-waste-dataset-r0ojc-4yoeh/dataset/4

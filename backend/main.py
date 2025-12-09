@@ -1,10 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 import os, uuid, json
 from ultralytics import YOLO
+from routes.gemini_routes import gemini_bp
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__, static_folder="static")
 CORS(app)  # Allow cross-origin requests from React frontend
+
+# Register Gemini blueprint
+app.register_blueprint(gemini_bp)
 
 # Folders for uploads and results
 UPLOAD_FOLDER = os.path.join(app.static_folder, "uploads")
