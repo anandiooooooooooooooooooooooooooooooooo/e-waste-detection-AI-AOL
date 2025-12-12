@@ -10,10 +10,18 @@ function App() {
   const uploadCardRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // App State
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fadeOutText, setFadeOutText] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  // Loading Steps
+  const loadingSteps = [
+    "Detecting components...",
+    "Analyzing materials...",
+    "Calculating value...",
+  ];
 
   // Convert file/blob to Base64 URL
   const fileToDataUrl = (file) =>
@@ -27,7 +35,6 @@ function App() {
     setFile(file);
     const url = await fileToDataUrl(file);
     setPreviewUrl(url);
-    setFadeOutText(true);
   };
 
   // File selection
@@ -42,27 +49,23 @@ function App() {
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) displayImage(droppedFile);
     if (uploadCardRef.current) {
-      uploadCardRef.current.style.borderColor = "var(--border)";
-      uploadCardRef.current.style.backgroundColor = "transparent";
+        uploadCardRef.current.classList.remove("drag-over");
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     if (uploadCardRef.current) {
-      uploadCardRef.current.style.borderColor = "var(--primary)";
-      uploadCardRef.current.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+        uploadCardRef.current.classList.add("drag-over");
     }
   };
 
   const handleDragLeave = () => {
     if (uploadCardRef.current) {
-      uploadCardRef.current.style.borderColor = "var(--border)";
-      uploadCardRef.current.style.backgroundColor = "transparent";
+        uploadCardRef.current.classList.remove("drag-over");
     }
   };
 
-  // Use demo image
   const useDemoImage = async () => {
     try {
       const res = await fetch(DUMMY_IMAGE_URL);
@@ -73,196 +76,187 @@ function App() {
     }
   };
 
-  // Send image to backend
   const startDetecting = async () => {
     if (!file) return alert("Please upload an image first!");
+
+    setLoading(true);
+    setLoadingStep(0);
+
+    // Simulate steps locally for effect while fetching
+    const stepInterval = setInterval(() => {
+        setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 1500);
+
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      setLoading(true);
       const res = await axios.post("http://127.0.0.1:5000/detect", formData);
       if (!res.data.success) throw new Error("Detection failed");
 
-      // Navigate to loading page and pass resultData
-      navigate("/loading", { state: { resultData: res.data.resultData } });
+      // Artificial delay to show off animation if api is too fast
+      setTimeout(() => {
+        clearInterval(stepInterval);
+        navigate("/result", { state: { resultData: res.data.resultData } });
+      }, 3000);
+
     } catch (err) {
       console.error(err);
       alert("Upload or detection failed.");
-    } finally {
       setLoading(false);
     }
   };
 
+
+  // --- RENDER HELPERS ---
+
+  const renderLoading = () => (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-up">
+        <div className="relative w-32 h-32 mb-12">
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-500 border-r-purple-500 animate-spin" style={{ animationDuration: '3s' }}></div>
+            <div className="absolute inset-2 rounded-full border border-purple-500/30"></div>
+            <div className="absolute inset-4 rounded-full bg-purple-500/10 flex items-center justify-center overflow-hidden backdrop-blur-md">
+                <svg className="w-12 h-12 text-purple-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+            </div>
+        </div>
+
+        <h2 className="text-3xl font-bold text-white mb-2">Analyzing E-Waste</h2>
+        <p className="text-gray-400 mb-8">AI is processing your image...</p>
+
+        {/* Steps */}
+        <div className="space-y-4 w-full max-w-xs">
+            {loadingSteps.map((step, index) => (
+                <div key={index} className={`flex items-center gap-4 transition-all duration-500 ${index <= loadingStep ? 'opacity-100 translate-x-0' : 'opacity-30 translate-x-4'}`}>
+                    <div className={`w-3 h-3 rounded-full ${index < loadingStep ? 'bg-cyan-500' : index === loadingStep ? 'bg-purple-500 animate-ping' : 'bg-gray-700'}`}></div>
+                    <span className={index <= loadingStep ? 'text-white font-medium' : 'text-gray-500'}>{step}</span>
+                </div>
+            ))}
+        </div>
+    </div>
+  );
+
   return (
-    <div className="overflow-hidden">
-      {/* Hero Section */}
-      <section
-        className="flex flex-col items-center justify-center"
-        style={{ height: "calc(100vh - 56px)" }}
-      >
-        <div className="max-w-7xl w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-8">
-              <div>
-                <h1 className="text-6xl lg:text-7xl font-extrabold leading-tight mb-6 gradient-text">
-                  e-nfo
-                </h1>
-                <p className="text-2xl font-semibold text-gray-300 mb-4 tracking-wide">
-                  E-Waste Analysis Powered by YOLOv8 & Custom Regression Model
-                </p>
-              </div>
+    <div className="min-h-screen w-full relative overflow-hidden flex flex-col">
+      {/* Background Decor */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-float" />
+          <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] animation-delay-2000 animate-float" />
+      </div>
 
-              <p className="text-xl leading-relaxed text-gray-400 mb-6 max-w-2xl">
-                <span className="font-bold text-green-400">e-nfo</span> uses{" "}
-                <span className="font-bold text-blue-400">YOLOv8</span> for
-                object detection and a custom regression model for value
-                estimation.
-                <br />
-                Upload your e-waste image to get instant analysis, component
-                breakdown, and estimated recycling value—all powered by advanced
-                AI.
-              </p>
-            </div>
+      <section className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl w-full mx-auto">
 
-            {/* Right Upload Card Section */}
-            <div className="space-y-6">
-              <div
-                style={{
-                  backgroundColor: "var(--surface)",
-                  borderRadius: 16,
-                  padding: 24,
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <div className="mb-6">
-                  <label
-                    htmlFor="fileInput"
-                    className="card-upload p-8 text-center cursor-pointer block relative overflow-hidden"
-                    ref={uploadCardRef}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    style={
-                      previewUrl
-                        ? {
-                            backgroundImage: `url(${previewUrl})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            backgroundRepeat: "no-repeat",
-                            minHeight: "200px",
-                            color: "#fff",
-                            transition: "background-image 0.3s",
-                            position: "relative",
-                          }
-                        : { minHeight: "200px", position: "relative" }
-                    }
-                  >
-                    {!previewUrl && (
-                      <div style={{ position: "relative", zIndex: 2 }}>
-                        <div className="text-4xl mb-3">📁</div>
-                        <p className="text-lg font-semibold mb-2">
-                          Upload Image
+            {!loading ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    {/* Hero Left */}
+                    <div className="space-y-8 animate-fade-up">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-xs font-medium text-cyan-400">
+                                <span className="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
+                                AI-Powered Detection
+                            </div>
+                            <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tight">
+                            <span className="text-white">Next Gen</span>
+                            <br />
+                            <span className="text-gradient drop-shadow-lg">E-Waste</span>
+                            <br />
+                            <span className="text-white/80">Analysis</span>
+                            </h1>
+                        </div>
+                        <p className="text-lg text-gray-400 max-w-xl leading-relaxed">
+                            Unlock the value of electronic waste with <span className="text-white font-semibold">e-nfo</span>.
+                            Powered by YOLOv8 and custom regression models to give you instant, accurate component breakdowns and valuation.
                         </p>
-                        <p className="text-sm text-gray-400">
-                          Drag and drop or click to select
-                        </p>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      id="fileInput"
-                      className="input-file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      style={{
-                        position: "absolute",
-                        width: "100%",
-                        height: "100%",
-                        top: 0,
-                        left: 0,
-                        opacity: 0,
-                        cursor: "pointer",
-                        zIndex: 3,
-                      }}
-                    />
-                  </label>
 
-                  {previewUrl && (
-                    <div className="mt-4 flex justify-center">
-                      <button
-                        className="btn-primary w-full py-3 text-lg"
-                        onClick={startDetecting}
-                        disabled={loading}
-                      >
-                        {loading ? "Detecting..." : "Start Detecting"}
-                      </button>
                     </div>
-                  )}
-                </div>
 
-                {/* OR Divider */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div
-                    className="flex-1 h-px"
-                    style={{ backgroundColor: "var(--border)" }}
-                  ></div>
-                  <span className="text-sm text-gray-500">OR</span>
-                  <div
-                    className="flex-1 h-px"
-                    style={{ backgroundColor: "var(--border)" }}
-                  ></div>
+                    {/* Hero Right: Upload Card */}
+                    <div className="relative animate-fade-up" style={{ animationDelay: '0.2s' }}>
+                        <div className="glass-panel rounded-3xl p-8 relative z-10 transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]">
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    Upload Image
+                                </h3>
+                                <div className="flex gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-red-500/50"></span>
+                                    <span className="w-2 h-2 rounded-full bg-yellow-500/50"></span>
+                                    <span className="w-2 h-2 rounded-full bg-green-500/50"></span>
+                                </div>
+                            </div>
+                            <div className="space-y-6">
+                                <div>
+                                    <label
+                                    htmlFor="fileInput"
+                                    className={`upload-zone h-64 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative overflow-hidden group ${previewUrl ? 'has-image' : ''}`}
+                                    ref={uploadCardRef}
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    >
+                                        {previewUrl ? (
+                                            <img src={previewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover rounded-2xl" />
+                                        ) : (
+                                            <div className="text-center p-6 space-y-3 relative z-10">
+                                                <div className="w-16 h-16 rounded-full bg-white/5 mx-auto flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                                                    <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                </div>
+                                                <p className="text-lg font-medium text-white">Drop image here</p>
+                                                <p className="text-sm text-gray-500">or click to browse</p>
+                                            </div>
+                                        )}
+                                        {previewUrl && (
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                <span className="text-white font-medium flex items-center gap-2">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                                Change Image
+                                                </span>
+                                            </div>
+                                        )}
+                                        <input
+                                        type="file"
+                                        id="fileInput"
+                                        className="hidden"
+                                        accept="image/*"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        />
+                                    </label>
+                                </div>
+                                {previewUrl ? (
+                                    <button
+                                        className="btn-primary w-full py-4 text-lg shadow-lg shadow-purple-500/20"
+                                        onClick={startDetecting}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                Analyzing...
+                                            </span>
+                                        ) : "Analyze Now"}
+                                    </button>
+                                ) : (
+                                    <>
+                                        <div className="relative flex py-2 items-center">
+                                            <div className="flex-grow border-t border-white/10"></div>
+                                            <span className="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase tracking-wider">Or try demo</span>
+                                            <div className="flex-grow border-t border-white/10"></div>
+                                        </div>
+                                        <button
+                                            className="btn-secondary w-full py-3 flex items-center justify-center gap-2 group"
+                                            onClick={useDemoImage}
+                                        >
+                                            <span className="text-gray-400 group-hover:text-white transition-colors">Use Sample Image</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            ) : renderLoading()}
 
-                {/* Demo Image Button */}
-                <div className="flex">
-                  <button
-                    className="btn-secondary py-3 flex items-center justify-center gap-2 w-full"
-                    onClick={useDemoImage}
-                  >
-                    <span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect width="18" height="18" x="3" y="3" rx="2" />
-                        <path d="M11 9h4a2 2 0 0 0 2-2V3" />
-                        <circle cx="9" cy="9" r="2" />
-                        <path d="M7 21v-4a2 2 0 0 1 2-2h4" />
-                        <circle cx="15" cy="15" r="2" />
-                      </svg>
-                    </span>
-                    <span>Use Demo Image</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Info Box */}
-              <div
-                style={{
-                  backgroundColor: "rgba(16, 185, 129, 0.1)",
-                  border: "1px solid var(--primary)",
-                  borderRadius: 12,
-                  padding: 16,
-                }}
-              >
-                <p className="text-sm text-gray-300">
-                  <span className="font-semibold text-green-400">💡 Tip:</span>{" "}
-                  Upload a clear image of electronic waste for best results. Our
-                  AI will analyze components and provide detailed insights.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
     </div>
