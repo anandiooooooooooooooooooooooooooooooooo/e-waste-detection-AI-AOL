@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 def main():
     # Load YOLO model (.pt)
-    model = YOLO("./models/yolo/last301125.pt")  # change to your file
+    model = YOLO("./models/yolo/best_40ep_60map.pt")  # change to your file
 
     # Video source
     cap = cv2.VideoCapture(0)  # webcam (0)
