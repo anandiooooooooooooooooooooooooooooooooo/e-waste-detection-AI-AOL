@@ -1,17 +1,15 @@
-import { ArcElement, Chart, Legend, Tooltip } from "chart.js";
-import { useEffect, useRef, useState } from "react";
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import { useEffect, useState } from "react";
+import { Doughnut } from "react-chartjs-2";
 import { useLocation, useNavigate } from "react-router-dom";
 
-Chart.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Result() {
   const navigate = useNavigate();
   const location = useLocation();
-  const chartRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState("details"); // 'details', 'locations'
-
-  // Get data from navigation state or redirect if missing
   const resultData = location.state?.resultData;
 
   useEffect(() => {
@@ -20,57 +18,57 @@ function Result() {
     }
   }, [resultData, navigate]);
 
-  // --- CHART EFFECT ---
-
-  useEffect(() => {
-    if (!resultData) return;
-
-    // Draw Chart
-    if (activeTab === "details") {
-        const timer = setTimeout(() => {
-            const ctx = document.getElementById("compositionChart");
-            if (ctx) {
-                if (chartRef.current) {
-                    chartRef.current.destroy();
-                }
-
-                chartRef.current = new Chart(ctx, {
-                    type: "doughnut",
-                    data: {
-                        labels: Object.keys(resultData.materials || {}),
-                        datasets: [
-                        {
-                            data: Object.values(resultData.materials || {}),
-                            backgroundColor: [
-                            "#40b19b", // Primary Teal
-                            "#1e1e1e", // Dark Grey
-                            "#f59e0b", // Amber (Accent)
-                            "#6b7280", // Slate
-                            "#9ca3af", // Light Grey
-                            ],
-                            borderColor: "rgba(255, 255, 255, 1)", // White border for separation
-                            borderWidth: 2,
-                            hoverOffset: 10
-                        },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: { color: '#1e1e1e', font: { family: 'Outfit', size: 14 } }
-                            },
-                        },
-                        cutout: '70%',
-                    },
-                });
-            }
-        }, 100);
-        return () => clearTimeout(timer);
+  // --- HELPER: Get Color by Material Risk ---
+  const getMaterialColor = (material) => {
+    const mat = material.toLowerCase();
+    // High Risk / Hazardous -> Red/Pink
+    if (["lead", "mercury", "cadmium", "arsenic", "beryllium", "lithium", "battery", "hazardous"].some(x => mat.includes(x))) {
+        return "#ef4444"; // Red-500
     }
-  }, [resultData, activeTab]);
+    // Moderate Risk / Warning -> Orange/Amber
+    if (["plastic", "pvc", "flame", "screen", "lcd", "monitor"].some(x => mat.includes(x))) {
+        return "#f59e0b"; // Amber-500
+    }
+    // Valuable / Safe -> Teal/Green/Blue
+    if (["gold", "silver", "platinum", "palladium"].some(x => mat.includes(x))) {
+        return "#10b981"; // Emerald-500 (Valuable)
+    }
+    if (["copper", "aluminum", "steel", "iron", "metal", "glass"].some(x => mat.includes(x))) {
+        return "#14b8a6"; // Teal-500 (Standard Recyclable)
+    }
+    // Default / Unknown -> Grey
+    return "#9ca3af"; // Gray-400
+  };
+
+  const materialKeys = Object.keys(resultData?.materials || {});
+  const materialValues = Object.values(resultData?.materials || {});
+  const materialColors = materialKeys.map(getMaterialColor);
+
+  // --- CHART OPTIONS ---
+  const chartData = {
+    labels: materialKeys,
+    datasets: [
+      {
+        data: materialValues,
+        backgroundColor: materialColors,
+        borderColor: "rgba(255, 255, 255, 1)",
+        borderWidth: 2,
+        hoverOffset: 10,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "right",
+        labels: { color: "#1e1e1e", font: { family: "Outfit", size: 14 } },
+      },
+    },
+    cutout: "70%",
+  };
 
   if (!resultData) return null;
 
@@ -119,39 +117,60 @@ function Result() {
 
                 {/* 2. Overview Stats */}
                 <div className="grid grid-cols-1 gap-4">
-                    {/* Primary Item */}
-                    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-center relative overflow-hidden group">
-                        <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                             <svg className="w-32 h-32 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                    {/* Primary Item - Now List of Detected Items */}
+                    <div className="glass-panel p-6 rounded-2xl flex items-center gap-6 relative overflow-hidden group h-full">
+                        <div className="flex-shrink-0 text-teal-500 opacity-20 p-2">
+                             <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
                         </div>
-                        <p className="text-[var(--text-secondary)] text-sm font-medium uppercase tracking-wider mb-1">Detected Item</p>
-                        <p className="text-4xl font-black text-[var(--text-primary)]">{resultData.detections[0]?.label || "Unknown"}</p>
-                        <p className="text-teal-600 mt-2 text-sm">{resultData.primary_component}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[var(--text-secondary)] text-sm font-medium uppercase tracking-wider mb-2">Detected Items ({resultData.detections?.length || 0})</p>
+
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[160px] custom-scrollbar">
+                            {resultData.detections && resultData.detections.length > 0 ? (
+                                resultData.detections.map((det, idx) => (
+                                    <div key={idx} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                                        <span className="text-2xl font-bold text-[var(--text-primary)] flex items-baseline gap-1">{det.label}</span>
+                                        <span className="text-xs font-mono bg-teal-500/10 text-teal-600 px-2 py-1 rounded-full border border-teal-500/20">
+                                            {Math.round((det.confidence || 0) * 100)}%
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-2xl font-black text-[var(--text-primary)]">Unknown</p>
+                            )}
+                        </div>
+                        <p className="text-teal-600 mt-3 text-sm font-medium border-t border-black/5 pt-2">
+                            {resultData.primary_component || "Detailed Analysis Below"}
+                        </p>
                     </div>
+                </div>
 
                     {/* Valuation */}
-                    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-center relative overflow-hidden group">
-                        <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <svg className="w-32 h-32 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div className="glass-panel p-6 rounded-2xl flex items-center gap-6 relative overflow-hidden group">
+                        <div className="flex-shrink-0 text-teal-400 opacity-20 p-2">
+                            <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
-                        <p className="text-[var(--text-secondary)] text-sm font-medium uppercase tracking-wider mb-1">Estimated Value</p>
-                        <p className="text-3xl font-bold text-[var(--text-primary)] flex items-baseline gap-1">
-                            {resultData.pricing?.currency || "IDR"}
-                            <span className="text-teal-600 ml-2">
-                                {resultData.pricing?.estimated_value_min ? `${resultData.pricing.estimated_value_min.toLocaleString()} - ${resultData.pricing.estimated_value_max.toLocaleString()}` : "0"}
-                            </span>
-                        </p>
-                        <p className="text-[var(--text-secondary)] text-xs mt-2 max-w-sm">{resultData.pricing?.reasoning}</p>
+                        <div className="flex-1">
+                            <p className="text-[var(--text-secondary)] text-sm font-medium uppercase tracking-wider mb-1">Estimated Value</p>
+                            <p className="text-3xl font-bold text-[var(--text-primary)] flex items-baseline gap-1">
+                                {resultData.pricing?.currency || "IDR"}
+                                <span className="text-teal-600 ml-2">
+                                    {resultData.pricing?.estimated_value_min ? `${resultData.pricing.estimated_value_min.toLocaleString()} - ${resultData.pricing.estimated_value_max.toLocaleString()}` : "0"}
+                                </span>
+                            </p>
+                            <p className="text-[var(--text-secondary)] text-xs mt-2 max-w-sm">{resultData.pricing?.reasoning}</p>
+                        </div>
                     </div>
 
-                    {/* Recylability */}
-                    <div className="glass-panel p-6 rounded-2xl flex items-center justify-between">
-                        <div>
-                             <p className="text-teal-600 text-sm font-medium uppercase tracking-wider mb-1">Recyclability Status</p>
-                             <p className="text-xl font-bold text-[var(--text-primary)]">Safe to Recycle</p>
+                    {/* Recyclability */}
+                    <div className="glass-panel p-6 rounded-2xl flex items-center gap-6 relative overflow-hidden group">
+                        <div className="flex-shrink-0 text-teal-500 opacity-20 p-2">
+                             <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         </div>
-                        <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-500">
-                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <div className="flex-1">
+                            <p className="text-[var(--text-secondary)] text-sm font-medium uppercase tracking-wider mb-1">Recyclability Status</p>
+                            <p className="text-3xl font-bold text-[var(--text-primary)]">Safe to Recycle</p>
+                            <p className="text-teal-600 mt-2 text-sm">Processed properly at standard facilities.</p>
                         </div>
                     </div>
                 </div>
@@ -182,7 +201,7 @@ function Result() {
                      {activeTab === 'details' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 h-full items-center">
                             <div className="h-[400px] relative">
-                                <canvas id="compositionChart"></canvas>
+                                <Doughnut data={chartData} options={chartOptions} />
                             </div>
                             <div className="space-y-6">
                                 <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">Material Composition</h3>

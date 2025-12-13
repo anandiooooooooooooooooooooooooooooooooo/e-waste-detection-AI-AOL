@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ModelAPI } from "../api/modelAPI";
 
 const DUMMY_IMAGE_URL =
   "https://images.unsplash.com/photo-1633356122544-f134324ef6db?w=500&h=500&fit=crop";
@@ -87,23 +87,20 @@ function App() {
         setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
     }, 1500);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await axios.post("http://127.0.0.1:5000/detect", formData);
-      if (!res.data.success) throw new Error("Detection failed");
+        const resultData = await ModelAPI.detect(file);
 
-      // Artificial delay to show off animation if api is too fast
-      setTimeout(() => {
-        clearInterval(stepInterval);
-        navigate("/result", { state: { resultData: res.data.resultData } });
-      }, 3000);
+        // Artificial delay to show off animation if api is too fast
+        setTimeout(() => {
+            clearInterval(stepInterval);
+            navigate("/result", { state: { resultData: resultData } });
+        }, 3000);
 
     } catch (err) {
-      console.error(err);
-      alert("Upload or detection failed.");
-      setLoading(false);
+        console.error(err);
+        alert(err.message || "Upload or detection failed.");
+        clearInterval(stepInterval);
+        setLoading(false);
     }
   };
 
