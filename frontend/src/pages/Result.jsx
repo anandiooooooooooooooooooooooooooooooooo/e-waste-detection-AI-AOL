@@ -9,14 +9,27 @@ function Result() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Initialize state from location or sessionStorage
+  const [resultData, setResultData] = useState(() => {
+      const stateData = location.state?.resultData;
+      if (stateData) {
+          sessionStorage.setItem('lastResult', JSON.stringify(stateData));
+          return stateData;
+      }
+      const stored = sessionStorage.getItem('lastResult');
+      return stored ? JSON.parse(stored) : null;
+  });
+
   const [activeTab, setActiveTab] = useState("details"); // 'details', 'locations'
-  const resultData = location.state?.resultData;
 
   useEffect(() => {
-    if (!resultData) {
-        navigate("/", { replace: true });
-    }
-  }, [resultData, navigate]);
+     // If we have fresh data from navigation, update storage and state
+     if (location.state?.resultData) {
+         setResultData(location.state.resultData);
+         sessionStorage.setItem('lastResult', JSON.stringify(location.state.resultData));
+     }
+  }, [location.state]);
+
 
   // --- HELPER: Get Color by Material Risk ---
   const getMaterialColor = (material) => {
@@ -70,7 +83,33 @@ function Result() {
     cutout: "70%",
   };
 
-  if (!resultData) return null;
+  if (!resultData) {
+      return (
+        <div className="min-h-screen w-full relative overflow-hidden flex flex-col items-center justify-center pt-24 pb-12">
+            {/* Background Decor */}
+            <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-teal-600/10 rounded-full blur-[100px] animate-float" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-teal-400/10 rounded-full blur-[120px] animation-delay-2000 animate-float" />
+            </div>
+
+            <div className="glass-panel p-12 rounded-3xl text-center space-y-6 max-w-lg mx-4 animate-fade-up">
+                <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 className="text-3xl font-bold text-[var(--text-primary)]">No result yet..</h2>
+                <p className="text-[var(--text-secondary)]">
+                    Upload photo first
+                </p>
+                <button
+                    onClick={() => navigate("/")}
+                    className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                >
+                    Start Analysis
+                </button>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex flex-col pt-24 pb-12">
@@ -85,10 +124,7 @@ function Result() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                     <div className="inline-flex items-center px-3 py-1 rounded-full bg-black/5 border border-black/10 backdrop-blur-sm text-xs font-medium text-teal-600 mb-2">
-                        <span className="w-2 h-2 rounded-full bg-teal-500 mr-2 animate-pulse"></span>
-                        Analysis Complete
-                    </div>
+
                     <h2 className="text-4xl font-bold text-[var(--text-primary)]">Result Overview</h2>
                 </div>
                 <button
@@ -111,7 +147,12 @@ function Result() {
                     <img
                         src={`http://127.0.0.1:5000${resultData.annotated_image_url}`}
                         alt="Annotated Result"
-                        className="w-full h-full object-cover rounded-xl"
+                        className="w-full h-full object-contain rounded-xl bg-black"
+                        onError={() => {
+                            console.log("Image failed to load, clearing result data.");
+                            sessionStorage.removeItem('lastResult');
+                            setResultData(null);
+                        }}
                     />
                 </div>
 
@@ -227,13 +268,12 @@ function Result() {
                         </div>
                     )}
 
-                    {activeTab === 'locations' && (
-                        <div className="h-full w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative">
+                    <div className={`${activeTab === 'locations' ? 'block' : 'hidden'} h-full w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative`}>
                              <iframe
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0, minHeight: '500px' }}
-                                loading="lazy"
+                                loading="eager"
                                 allowFullScreen
                                 src={`https://www.google.com/maps?q=recycle+${resultData.detections[0]?.label || "e-waste"}+near+me&output=embed`}
                             ></iframe>
@@ -241,7 +281,6 @@ function Result() {
                                 📍 Near You
                             </div>
                         </div>
-                    )}
                 </div>
             </div>
 
