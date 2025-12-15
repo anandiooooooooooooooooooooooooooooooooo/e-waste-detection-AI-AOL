@@ -48,14 +48,20 @@
 }
 
 body {
-  background-color: var(--background);
+  background-color: transparent;
   color: var(--text-primary);
   margin: 0;
   overflow-x: hidden;
-  /* Very subtle gradient using a slightly darker shade of the background color */
-  background-image:
-    radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(64, 177, 155, 0.03) 0%, transparent 25%);
+}
+
+@keyframes bg-pan {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 100% 100%;
+  }
 }
 
 /* ===========================

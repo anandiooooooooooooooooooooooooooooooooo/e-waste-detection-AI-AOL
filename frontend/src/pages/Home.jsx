@@ -141,10 +141,10 @@ function App() {
         {loadingSteps.map((step, index) => (
           <div
             key={index}
-            className={`flex items-center gap-4 transition-all duration-500 ${
+            className={`flex items-center justify-center gap-4 transition-all duration-500 ${
               index <= loadingStep
-                ? "opacity-100 translate-x-0"
-                : "opacity-30 translate-x-4"
+                ? "opacity-100 scale-105"
+                : "opacity-40 scale-95"
             }`}
           >
             <div

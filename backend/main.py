@@ -34,6 +34,14 @@ except Exception as e:
     print(f"Error initializing Inference Service: {e}")
     # We don't exit, but /detect might fail.
 
+try:
+    from services.gemini_service import GeminiService
+    app.gemini_service = GeminiService()
+    print("Gemini Service Initialized.")
+except Exception as e:
+    print(f"Warning: Gemini Service not initialized - {e}")
+    app.gemini_service = None
+
 # Register Blueprints
 app.register_blueprint(gemini_bp)
 app.register_blueprint(detection_bp)

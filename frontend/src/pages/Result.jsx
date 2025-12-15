@@ -31,31 +31,37 @@ function Result() {
   }, [location.state]);
 
 
-  // --- HELPER: Get Color by Material Risk ---
-  const getMaterialColor = (material) => {
-    const mat = material.toLowerCase();
-    // High Risk / Hazardous -> Red/Pink
-    if (["lead", "mercury", "cadmium", "arsenic", "beryllium", "lithium", "battery", "hazardous"].some(x => mat.includes(x))) {
-        return "#ef4444"; // Red-500
-    }
-    // Moderate Risk / Warning -> Orange/Amber
-    if (["plastic", "pvc", "flame", "screen", "lcd", "monitor"].some(x => mat.includes(x))) {
-        return "#f59e0b"; // Amber-500
-    }
-    // Valuable / Safe -> Teal/Green/Blue
-    if (["gold", "silver", "platinum", "palladium"].some(x => mat.includes(x))) {
-        return "#10b981"; // Emerald-500 (Valuable)
-    }
-    if (["copper", "aluminum", "steel", "iron", "metal", "glass"].some(x => mat.includes(x))) {
-        return "#14b8a6"; // Teal-500 (Standard Recyclable)
-    }
-    // Default / Unknown -> Grey
-    return "#9ca3af"; // Gray-400
+  // --- HELPER: Get Unique Colors ---
+  const getMaterialColor = (material, index) => {
+    // Extensive palette of distinct, vibrant colors to ensure uniqueness
+    const palette = [
+        "#3B82F6", // Blue-500
+        "#EF4444", // Red-500
+        "#10B981", // Emerald-500
+        "#F59E0B", // Amber-500
+        "#8B5CF6", // Violet-500
+        "#EC4899", // Pink-500
+        "#06B6D4", // Cyan-500
+        "#F97316", // Orange-500
+        "#6366F1", // Indigo-500
+        "#84CC16", // Lime-500
+        "#D946EF", // Fuchsia-500
+        "#14B8A6", // Teal-500
+        "#F43F5E", // Rose-500
+        "#A855F7", // Purple-500
+        "#EAB308", // Yellow-500
+        "#22C55E", // Green-500
+    ];
+    return palette[index % palette.length];
   };
 
-  const materialKeys = Object.keys(resultData?.materials || {});
-  const materialValues = Object.values(resultData?.materials || {});
-  const materialColors = materialKeys.map(getMaterialColor);
+  // Sort materials by percentage descending
+  const sortedMaterials = Object.entries(resultData?.materials || {})
+    .sort(([, a], [, b]) => b - a);
+
+  const materialKeys = sortedMaterials.map(([k]) => k);
+  const materialValues = sortedMaterials.map(([, v]) => v);
+  const materialColors = materialKeys.map((k, i) => getMaterialColor(k, i));
 
   // --- CHART OPTIONS ---
   const chartData = {
@@ -247,18 +253,20 @@ function Result() {
                             <div className="space-y-6">
                                 <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">Material Composition</h3>
                                 <div className="space-y-4">
-                                    {Object.entries(resultData.materials || {}).map(([mat, percent], i) => (
-                                        <div key={i} className="group">
-                                            <div className="flex justify-between items-center mb-2">
+                                {sortedMaterials.map(([mat, percent], i) => (
+                                    <div key={i} className="group">
+                                        <div className="flex justify-between items-center mb-2">
                                                 <span className="text-[var(--text-secondary)] font-medium group-hover:text-black transition-colors">{mat}</span>
-                                                <span className="text-teal-600 font-mono">{percent}%</span>
+                                                <span className="text-[var(--text-primary)] font-mono font-bold" style={{ color: getMaterialColor(mat, i) }}>{percent}%</span>
                                             </div>
                                             <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-gradient-to-r from-teal-500 to-teal-400 relative"
-                                                    style={{ width: `${percent}%` }}
+                                                    className="h-full relative transition-all duration-1000 ease-out"
+                                                    style={{
+                                                        width: `${percent}%`,
+                                                        backgroundColor: getMaterialColor(mat, i)
+                                                    }}
                                                 >
-                                                    <div className="absolute top-0 right-0 bottom-0 w-full animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -268,18 +276,16 @@ function Result() {
                         </div>
                     )}
 
-                    <div className={`${activeTab === 'locations' ? 'block' : 'hidden'} h-full w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative`}>
+                    <div className={`${activeTab === 'locations' ? 'block' : 'hidden'} h-[90vh] w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative`}>
                              <iframe
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0, minHeight: '500px' }}
                                 loading="eager"
                                 allowFullScreen
-                                src={`https://www.google.com/maps?q=recycle+${resultData.detections[0]?.label || "e-waste"}+near+me&output=embed`}
+                                src={`https://www.google.com/maps?q=barang+bekas+${resultData.detections[0]?.label || "elektronik"}&output=embed&t=k`}
                             ></iframe>
-                             <div className="absolute top-4 right-4 bg-white/90 backdrop-blur text-black px-4 py-2 rounded-lg text-sm font-semibold shadow-xl">
-                                📍 Near You
-                            </div>
+
                         </div>
                 </div>
             </div>

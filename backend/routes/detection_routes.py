@@ -27,16 +27,39 @@ def detect():
         # 1. Process Image & Detect
         result_data = inference_service.process_image(file)
 
-        # 2. Analyze (Mock/Gemini)
+        # 2. Analyze (Gemini with Mock Fallback)
         detections = result_data["detections"]
-        gemini_result = MockService.analyze_detection_results(detections)
 
-        if gemini_result.get("success"):
-            analysis = gemini_result["analysis"]
-            result_data["materials"] = analysis.get("materials", {})
-            result_data["pricing"] = analysis.get("pricing", {})
-            result_data["primary_component"] = analysis.get("primary_component", "Unknown")
+        # Try real Gemini API first
+        gemini_service = getattr(current_app, 'gemini_service', None)
+        analysis_result = None
+
+        if gemini_service:
+            try:
+                print("Attempting Gemini analysis...")
+                gemini_response = gemini_service.analyze_detection_results(detections)
+                if gemini_response.get("success"):
+                     print("Gemini analysis successful.")
+                     analysis_result = gemini_response["analysis"]
+                else:
+                     print(f"Gemini analysis failed: {gemini_response.get('error')}")
+            except Exception as e:
+                print(f"Gemini service error: {e}")
+
+        # Fallback to Mock if Gemini failed or not available
+        if not analysis_result:
+            print("Falling back to Mock Service.")
+            mock_response = MockService.analyze_detection_results(detections)
+            analysis_result = mock_response["analysis"]
+
+        # Populate result data
+        if analysis_result:
+            result_data["materials"] = analysis_result.get("materials", {})
+            result_data["pricing"] = analysis_result.get("pricing", {})
+            result_data["primary_component"] = analysis_result.get("primary_component", "Unknown")
+            result_data["recyclability_score"] = analysis_result.get("recyclability_score", 0)
         else:
+             # This should barely happen due to mock fallback
              result_data["materials"] = {"Unknown": 100}
              result_data["pricing"] = {"estimated_value_min": 0, "estimated_value_max": 0, "currency": "IDR"}
 

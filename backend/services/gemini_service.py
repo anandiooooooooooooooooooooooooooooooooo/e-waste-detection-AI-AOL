@@ -97,8 +97,8 @@ class GeminiService:
             item_counts[item] = item_counts.get(item, 0) + 1
 
         prompt = f"""
-        You are an expert e-waste valuator and materials scientist.
-        Analyze these detected items: {item_counts}
+        You are an expert e-waste valuator and materials scientist specializing in the Indonesian recycling market.
+        Analyze these detected items found in an image: {item_counts}
 
         Provide a strictly valid JSON response with the following structure:
         {{
@@ -109,16 +109,21 @@ class GeminiService:
                 "currency": "IDR",
                 "estimated_value_min": integer_value,
                 "estimated_value_max": integer_value,
-                "reasoning": "Short explanation of value based on current scrap prices in Indonesia"
+                "reasoning": "Detailed explanation of value based on current scrap prices in Indonesia (mention specific compiled rates for Copper, Gold, PCB, etc)"
             }},
             "recyclability_score": integer_0_to_100,
             "primary_component": "Name of the main component detected"
         }}
 
         Rules:
-        1. Materials must sum to roughly 100%. estimate based on the typical composition of these electronic items.
-        2. Pricing should be realistic for SCRAP/RECYCLE value in Indonesia (Rupiah), not retail value.
-        3. Do NOT wrap in markdown code blocks. Just raw JSON.
+        1. Materials: Break down into specific recyclable elements (e.g., 'Copper', 'Gold', 'Aluminum', 'ABS Plastic', 'PCB High Grade') rather than generic terms like 'Metal'. Sum must be ~100%.
+        2. Pricing: MUST be realistic for **SCRAP/RECYCLER** buying price in Indonesia (Rupiah), NOT retail/second-hand price.
+           - Example: A single motherboard might be ~Rp 50,000 - Rp 150,000 depending on grade.
+           - Example: A whole keyboard is very low value (mostly plastic), maybe Rp 5,000 scrap value.
+           - Be conservative and realistic.
+        3. Recyclability: High for items with precious metals, low for mostly plastic items.
+        4. Do NOT wrap in markdown code blocks. Just raw JSON.
+        5. PLAIN TEXT ONLY: Do NOT use markdown styling (bold, italic, etc.) inside the 'reasoning' or any other text fields. Return clean, plain text strings.
         """
 
         try:
