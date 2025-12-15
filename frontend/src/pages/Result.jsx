@@ -103,8 +103,8 @@ function Result() {
                     <svg className="w-12 h-12 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
 
-                <h2 className="text-5xl lg:text-7xl font-black leading-none tracking-tight space-y-2">
-                    <span className="text-[var(--text-primary)] opacity-40 block text-3xl font-bold tracking-normal">No Results</span>
+                <h2 className="text-4xl lg:text-5xl font-black leading-none tracking-tight space-y-2">
+                    <span className="text-[var(--text-primary)] opacity-40 block text-2xl font-bold tracking-normal">No Results</span>
                     <span className="text-gradient drop-shadow-sm block">Found Yet...</span>
                 </h2>
 

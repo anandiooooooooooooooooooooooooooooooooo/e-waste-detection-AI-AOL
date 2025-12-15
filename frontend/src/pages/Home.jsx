@@ -186,25 +186,16 @@ function App() {
               {/* Hero Left */}
               <div className="space-y-8 animate-fade-up">
                 <div className="space-y-4">
-                  <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tight">
-                    <span className="text-[var(--text-primary)]">Next Gen</span>
-                    <br />
-                    <span className="text-gradient drop-shadow-sm">
-                      E-Waste
-                    </span>
-                    <br />
-                    <span className="text-[var(--text-secondary)]">
-                      Analysis
-                    </span>
+                  <h1 className="text-6xl lg:text-8xl font-black mb-2">
+                    <span className="text-gradient drop-shadow-sm">E-nfo</span>
                   </h1>
+
+                  <h2 className="text-[var(--text-primary)] text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+                    Reveal the Hidden Value Inside Your E-Waste
+                  </h2>
                 </div>
                 <p className="text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
-                  Unlock the value of electronic waste with{" "}
-                  <span className="text-[var(--text-primary)] font-semibold">
-                    e-nfo
-                  </span>
-                  . Powered by YOLOv8 and custom regression models to give you
-                  instant, accurate component breakdowns and valuation.
+                  Powered by <span className="text-[var(--text-primary)] font-semibold">YOLOv8</span> and the <span className="text-[var(--text-primary)] font-semibold">Gemini API</span>, E-nfo provides instant and real-world-accurate identification and valuation of electronic waste. By combining computer vision and intelligent analysis, E-nfo helps you uncover the true value of your e-waste, manage it responsibly, and contribute to a sustainable circular economy.
                 </p>
               </div>
 
@@ -241,7 +232,7 @@ function App() {
                     <div>
                       <label
                         htmlFor="fileInput"
-                        className={`upload-zone h-64 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative overflow-hidden group ${
+                        className={`upload-zone h-52 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative overflow-hidden group ${
                           previewUrl ? "has-image" : ""
                         }`}
                         ref={uploadCardRef}
