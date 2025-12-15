@@ -98,18 +98,25 @@ function Result() {
                 <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-teal-400/10 rounded-full blur-[120px] animation-delay-2000 animate-float" />
             </div>
 
-            <div className="glass-panel p-12 rounded-3xl text-center space-y-6 max-w-lg mx-4 animate-fade-up">
-                <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-10 h-10 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div className="glass-panel p-16 rounded-3xl text-center space-y-8 max-w-2xl mx-4 animate-fade-up relative overflow-hidden">
+                <div className="w-24 h-24 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/20 shadow-xl">
+                    <svg className="w-12 h-12 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h2 className="text-3xl font-bold text-[var(--text-primary)]">No result yet..</h2>
-                <p className="text-[var(--text-secondary)]">
-                    Upload photo first
+
+                <h2 className="text-5xl lg:text-7xl font-black leading-none tracking-tight space-y-2">
+                    <span className="text-[var(--text-primary)] opacity-40 block text-3xl font-bold tracking-normal">No Results</span>
+                    <span className="text-gradient drop-shadow-sm block">Found Yet...</span>
+                </h2>
+
+                <p className="text-xl text-[var(--text-secondary)] leading-relaxed max-w-md mx-auto">
+                    Ready to discover the hidden value? <br/> Upload an image to start the analysis.
                 </p>
+
                 <button
                     onClick={() => navigate("/")}
-                    className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                    className="btn-primary px-10 py-4 text-lg rounded-2xl shadow-xl shadow-teal-500/20 hover:scale-105 transition-transform duration-300 mx-auto flex items-center gap-3"
                 >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Start Analysis
                 </button>
             </div>
