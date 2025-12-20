@@ -21,6 +21,14 @@ function Result() {
   });
 
   const [activeTab, setActiveTab] = useState("details"); // 'details', 'locations'
+  const [shouldLoadMap, setShouldLoadMap] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'locations' && !shouldLoadMap) {
+        setShouldLoadMap(true);
+    }
+  }, [activeTab, shouldLoadMap]);
 
   useEffect(() => {
      // If we have fresh data from navigation, update storage and state
@@ -284,16 +292,30 @@ function Result() {
                     )}
 
                     <div className={`${activeTab === 'locations' ? 'block' : 'hidden'} h-[90vh] w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative`}>
-                             <iframe
-                                width="100%"
-                                height="100%"
-                                style={{ border: 0, minHeight: '500px' }}
-                                loading="eager"
-                                allowFullScreen
-                                src={`https://www.google.com/maps?q=barang+bekas+${resultData.detections[0]?.label || "elektronik"}&output=embed&t=k`}
-                            ></iframe>
-
-                        </div>
+                        {shouldLoadMap ? (
+                             <>
+                                {!isMapReady && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/5 z-0 w-full h-full backdrop-blur-sm transition-all duration-300">
+                                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-teal-500/30 border-t-teal-600 mb-4"></div>
+                                         <span className="text-teal-600 font-medium animate-pulse">Locating Recycling Centers...</span>
+                                    </div>
+                                )}
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0, minHeight: '500px', opacity: isMapReady ? 1 : 0, transition: 'opacity 0.7s ease-in-out' }}
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={`https://www.google.com/maps?q=barang+bekas+${resultData.detections[0]?.label || "elektronik"}&output=embed&t=m`}
+                                    onLoad={() => setIsMapReady(true)}
+                                ></iframe>
+                            </>
+                        ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/5">
+                                <span className="text-[var(--text-secondary)]">Waiting to load map...</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
