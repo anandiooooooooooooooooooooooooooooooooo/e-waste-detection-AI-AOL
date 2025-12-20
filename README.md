@@ -1,89 +1,166 @@
-# Artificial Intelligence E-Waste Detection
+# 🌍 E-Waste Detection AI
 
-This project is an AI-powered application for detecting and classifying e-waste items, providing recycling information and estimated value. It consists of a Flask backend (using Google Gemini and YOLO) and a React frontend.
+> **📚 Academic Project**
+> Final Project for Artificial Intelligence Course - 3rd Semester
+> BINUS University
 
-## Prerequisites
+An AI-powered application for detecting and classifying electronic waste, providing material analysis, recycling value estimates, and recycling center locations.
 
-- **Python 3.8+**
-- **Node.js 16+** and **npm**
-- **Google Gemini API Key** (Get it from [Google AI Studio](https://makersuite.google.com/app/apikey))
-
----
-
-## Quick Start Guide
-
-You need to run both the backend and frontend terminals simultaneously.
-
-### 1. Backend Setup (Flask API)
-
-Navigate to the backend directory and set up the environment:
-
-1.  **Open a terminal** and move to the backend folder:
-    ```bash
-    cd backend
-    ```
-
-2.  **Create a virtual environment (optional but recommended):**
-    ```bash
-    # Windows
-    python -m venv venv
-    venv\Scripts\activate
-
-    # Mac/Linux
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configure Environment Variables:**
-    - Create a `.env` file in the `backend/` directory.
-    - Add your Gemini API key:
-      ```env
-      GEMINI_API_KEY=your_actual_api_key_here
-      ```
-    - *(Tip: You can copy `.env.example` to `.env` if it exists)*
-
-5.  **Start the Backend Server:**
-    ```bash
-    python main.py
-    ```
-    The server should start on `http://127.0.0.1:5000`.
-
-### 2. Frontend Setup (React App)
-
-Open a **new terminal** (keep the backend running) and set up the frontend:
-
-1.  **Move to the frontend directory:**
-    ```bash
-    cd frontend
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Start the Development Server:**
-    ```bash
-    npm run dev
-    ```
-    The site will typically run on `http://localhost:5173`.
+**Tech Stack:** Flask + Google Gemini + YOLOv8 (Backend) | React + Vite + Three.js (Frontend)
 
 ---
 
-## Features
+## 📋 Table of Contents
 
-- **Object Detection:** Detects e-waste items using YOLO (or Gemini as fallback).
-- **Material Analysis:** precise breakdown of materials found in the e-waste.
-- **Value Estimation:** Estimates the potential recycling value.
-- **Recycling Locations:** Finds nearby recycling centers using Google Maps.
+- [How It Works](#-how-it-works)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Project Structure](#-project-structure)
+- [Troubleshooting](#-troubleshooting)
 
-## Troubleshooting
+---
 
-- **Backend errors?** Check if your `GEMINI_API_KEY` is correct in `backend/.env`.
-- **Frontend can't connect?** Ensure the backend is running on port `5000`.
-- **Missing modules?** Run `pip install -r requirements.txt` (backend) or `npm install` (frontend) again.
+## 🔄 How It Works
+
+1. **User uploads an image** of electronic waste through the React frontend
+2. **Image is sent to Flask backend** via REST API
+3. **YOLOv8 model detects** and identifies e-waste items in the image
+4. **Google Gemini AI analyzes** the detected items for:
+   - Material composition (copper, aluminum, plastics, etc.)
+   - Estimated recycling value in IDR
+   - Recyclability score
+5. **Results are displayed** with annotated images, charts, and Google Maps locations
+
+---
+
+## ✅ Prerequisites
+
+Before you begin, make sure you have:
+
+- **Python 3.8+** installed
+- **Node.js 16+** and **npm** installed
+- **Google Gemini API Key** ([Get it here](https://makersuite.google.com/app/apikey))
+
+---
+
+## 🚀 Quick Start
+
+### Step 1: Backend Setup (Python/Flask)
+
+Open a terminal and navigate to the backend folder:
+
+```bash
+cd backend
+```
+
+**Create a virtual environment (recommended):**
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+**Install dependencies:**
+
+```bash
+pip install -r requirements.txt
+```
+
+**Configure API Key:**
+
+Create a `.env` file in the `backend/` directory and add your Gemini API key:
+
+```env
+GEMINI_API_KEY=your_actual_api_key_here
+```
+
+**Start the server:**
+
+```bash
+python main.py
+```
+
+✅ Backend should now be running at `http://127.0.0.1:5000`
+
+---
+
+### Step 2: Frontend Setup (React/Vite)
+
+Open a **new terminal** (keep the backend running) and navigate to the frontend folder:
+
+```bash
+cd frontend
+```
+
+**Install dependencies:**
+
+```bash
+npm install
+```
+
+**Start the development server:**
+
+```bash
+npm run dev
+```
+
+✅ Frontend should now be running at `http://localhost:5173`
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Object Detection** | Uses YOLOv8 to detect e-waste items in uploaded images |
+| 🧪 **Material Analysis** | AI-powered breakdown of materials (copper, gold, plastics, etc.) |
+| 💰 **Value Estimation** | Estimates potential recycling value in Indonesian Rupiah |
+| 📊 **Visual Analytics** | Charts showing material composition and recyclability |
+| 🗺️ **Recycling Locations** | Google Maps integration to find nearby recycling centers |
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── backend/                # Flask Backend (Python)
+│   ├── datasets/           # Dataset metadata for training
+│   ├── models/             # YOLOv8 model weights (.pt files)
+│   ├── routes/             # API endpoints (/detect, /api/*)
+│   ├── services/           # Business logic (YOLO, Gemini, Mock)
+│   ├── static/             # File storage (uploads & results)
+│   ├── main.py             # Flask app entry point
+│   └── requirements.txt    # Python dependencies
+│
+├── frontend/               # React Frontend (Vite)
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Route pages (Home, Result, Docs)
+│   │   └── api/            # API client helpers
+│   ├── package.json        # Node.js dependencies
+│   └── vite.config.js      # Vite build configuration
+│
+└── README.md               # This file
+```
+
+---
+
+## 🔧 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| ❌ Backend errors on startup | Check if `GEMINI_API_KEY` is correctly set in `backend/.env` |
+| ❌ Frontend can't connect to backend | Ensure backend is running on port `5000` |
+| ❌ "Module not found" errors | Run `pip install -r requirements.txt` (backend) or `npm install` (frontend) |
+| ❌ YOLO model not loading | Verify that `backend/models/yolo/best_40ep_60map.pt` exists |
+
+---
+
+**Made with ❤️ for a sustainable future**
