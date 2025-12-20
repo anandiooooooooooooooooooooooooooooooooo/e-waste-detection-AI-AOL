@@ -1,0 +1,66 @@
+PROJECT STRUCTURE EXPLANATION
+
+This document explains the purpose of each key file and directory in the project.
+
+================================================================================
+BACKEND (Flask + Python)
+Path: /backend/
+================================================================================
+
+[Core Files]
+- main.py: The entry point of the Flask application. It initializes the app, configuring CORS, loading environment variables, and registering blueprints (routes). It also initializes the global InferenceService and GeminiService.
+- requirements.txt: Lists all Python libraries required to run the backend (Flask, ultralytics, google-generativeai, etc.).
+
+[Routes]
+- routes/detection_routes.py: Handles the `/detect` endpoint. It receives an image, uses `InferenceService` to detect objects (YOLO), and optionally analyzes them using Gemini (or a Mock fallback). It returns the detection results to the frontend.
+- routes/gemini_routes.py: Handles direct interactions with the Gemini API (e.g., text generation, specific e-waste recycling info), largely for testing or specific API-only features.
+
+[Services]
+- services/inference_service.py: Encapsulates the YOLO object detection logic. It handles image saving, running the model, drawing bounding boxes, and saving the annotated output.
+- services/gemini_service.py: Encapsulates the Google Gemini API logic. It constructs prompts to ask Gemini about e-waste materials, pricing, and recycling advice based on detected labels.
+- services/mock_service.py: A fallback service that provides realistic dummy data (materials, pricing) if the Gemini API is unavailable or fails.
+
+[Models]
+- models/yolo/best_40ep_60map.pt: The custom-trained YOLOv8 model weights used for detecting e-waste items.
+- models/yolo/yolov8n.pt: Standard YOLOv8 nano weights (likely used as a base or fallback).
+
+[Static]
+- static/uploads/: Stores raw images uploaded by the user.
+- static/results/: Stores images annotated with bounding boxes after processing.
+
+[Datasets]
+- datasets/: Contains metadata about the dataset used for training, although the actual training data might not be fully present in the production deployment.
+
+================================================================================
+FRONTEND (React + Vite)
+Path: /frontend/
+================================================================================
+
+[Setup & Config]
+- vite.config.js: Configuration for the Vite build tool.
+- package.json: Lists Node.js dependencies (React, Three.js, Tailwind, etc.) and scripts.
+- eslint.config.js: Configuration for code linting (quality checks).
+- postcss.config.mjs / tailwind.config.js (implied): Configuration for Tailwind CSS styling.
+
+[Source Code] (src/)
+- src/main.jsx: The entry point for the React application. It grabs the 'root' div and renders the App.
+- src/globals.css: Global CSS styles, including Tailwind directives and custom theme variables.
+
+[Components] (src/components/)
+- components/Navbar.jsx: The top navigation bar component.
+- components/Loading.jsx: A loading spinner or animation component used while waiting for backend results.
+- components/Background3D.jsx: A visual background component using Three.js (via React Three Fiber) to render 3D elements for a modern aesthetic.
+
+[Pages] (src/pages/)
+- pages/Home.jsx: The landing page. It features the "hero" section and the file upload interface. It handles sending the image to the backend and navigating to the Result page.
+- pages/Result.jsx: The detailed results page. It fetches and displays the detection data, showing the annotated image, materials breakdown, estimated value, and recycling information.
+- pages/Docs.jsx: A documentation page for users to read about the project.
+
+[API]
+- api/modelAPI.js: A helper module for making HTTP requests to the backend (e.g., calling the /detect endpoint).
+
+================================================================================
+DEV UTILITIES
+Path: /dev/
+================================================================================
+- dev/: Contains training resources, dataset backups, and previous model versions. This folder is generally excluded from the production build and git tracking (via .gitignore).

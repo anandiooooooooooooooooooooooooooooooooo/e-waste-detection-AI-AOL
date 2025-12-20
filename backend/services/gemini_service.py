@@ -2,7 +2,6 @@ import google.generativeai as genai
 import os
 from typing import Optional, Dict, Any, List
 
-
 class GeminiService:
     """Service class for interacting with Google's Gemini API"""
 

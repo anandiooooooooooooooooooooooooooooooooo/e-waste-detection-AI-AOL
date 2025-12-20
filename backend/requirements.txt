@@ -3,3 +3,5 @@ flask-cors
 ultralytics
 google-generativeai
 python-dotenv
+opencv-python
+requests
