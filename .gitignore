@@ -43,11 +43,7 @@ pip-delete-this-directory.txt
 *.h5
 *.ckpt
 *.onnx
-dev/models/*       # ignore all model files
-!dev/models/yolo/
-!dev/models/yolo/README.md
-!dev/models/regression/
-!dev/models/regression/README.md
+
 
 # Ignore static file outputs but keep README placeholders
 backend/static/results/*
@@ -66,15 +62,7 @@ backend/**/*.pyc
 # 🤖 Dev / Training
 # =========================
 # Dataset folder: ignore everything except README.md
-dev/dataset/*
-!dev/dataset/README.md
 
-# Notebooks and training utils: ignore everything except README.md
-dev/notebooks/*
-!dev/notebooks/README.md
-dev/notebooks/.ipynb_checkpoints/
-dev/utils_training/*
-!dev/utils_training/README.md
 
 # =========================
 # ⚛️ Frontend (React)
@@ -125,11 +113,5 @@ frontend/.env.production.local
 # Ignore large folders and files to reduce repo size
 backend/static/results/
 backend/static/uploads/
-dev/e_waste_dataset/train/
-dev/e_waste_dataset/valid/
-dev/e_waste_dataset/test/
-dev/models/trained_model/
-dev/runs/detect/
-dev/e_waste_dataset.zip
-!dev/models/trained_model/README.md
+dev/
 !runs/detect/README.md
